@@ -1,0 +1,63 @@
+#include <iostream> 
+#include <vector> using
+namespace std;
+string railFenceEncrypt(string s, int n) { vector<vector<char> > a(n,
+vector<char>(s.size(), ' '));
+int j = 0; int flag= 0;
+for (int i = 0; i < s.size(); i++) { a[j][i] = 
+s[i];
+if (j == n - 1) { flag = 1;
+} else if (j == 0) flag = 0;
+if (flag == 0) { j++;
+} else
+j--;
+}
+string encrypted;
+for (int i = 0; i < n; i++) {
+for (int j = 0; j < s.size(); j++) { if 
+(a[i][j] != ' ')
+encrypted += a[i][j];
+}
+}
+return encrypted;
+}
+ string railFenceDecrypt(string s, int n) { vector<vector<char> > a(n,
+vector<char>(s.size(), ' '));
+ int j = 0; int flag = 0;
+for (int i = 0; i < s.size(); i++) { a[j][i] = '0';
+if (j == n - 1) { flag = 1;
+} else if (j == 0) 
+flag = 0;
+if (flag == 0) { j++;
+} else
+j--;
+}
+int temp = 0;
+for (int i = 0; i < n; i++) {
+for (int j = 0; j < s.size(); j++) { if 
+(a[i][j] == '0')
+a[i][j] = s[temp++];
+}}
+string decrypted; flag = 0;
+j = 0;
+for (int i = 0; i < s.size(); i++) { 
+decrypted += a[j][i];
+if (j == n - 1) { flag = 1;
+} else if (j == 0) flag = 0;
+if (flag == 0) { j++;
+} else j--;
+}
+return decrypted;
+}
+ int main() { 
+string s; int n;
+cout << "Enter the message: ";
+ cin >> s;
+cout << "Enter the key: ";
+ cin >> n;
+string encrypted = railFenceEncrypt(s, n);
+cout << "Encrypted Message: " << encrypted << endl;
+string decrypted = railFenceDecrypt(encrypted, n);
+ cout << "Decrypted Message: " << decrypted << endl:
+  return 0;
+}
