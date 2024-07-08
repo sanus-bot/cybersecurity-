@@ -1,0 +1,52 @@
+import socket
+import struct
+
+# Define some common signatures (simplified)
+signatures = {
+    b"GET": "Potential HTTP GET attack detected",
+    b"POST": "Potential HTTP POST attack detected",
+    b"badrequest": "Potential bad request detected"
+}
+
+# Function to match packet payload against signatures
+def match_signatures(payload):
+    for signature, message in signatures.items():
+        if signature in payload:
+            return message
+    return None
+
+# Function to sniff packets and detect signatures
+def sniff_packets(interface):
+    # Create a raw socket to capture packets
+    with socket.socket(socket.AF_PACKET, socket.SOCK_RAW, socket.htons(0x0003)) as sock:
+        sock.bind((interface, 0))
+
+        while True:
+            # Receive a packet
+            packet, _ = sock.recvfrom(65536)
+
+            # Extract Ethernet frame data (skip Ethernet header)
+            eth_length = 14
+            eth_header = packet[:eth_length]
+            ip_header = packet[eth_length:20+eth_length]
+
+            # Extract IP addresses
+            iph = struct.unpack('!BBHHHBBH4s4s' , ip_header)
+            src_address = socket.inet_ntoa(iph[8])
+            dst_address = socket.inet_ntoa(iph[9])
+
+            # Extract payload (skip IP and TCP headers)
+            payload = packet[eth_length + 20:]
+
+            # Match signatures in payload
+            signature_match = match_signatures(payload)
+            if signature_match:
+                print(f"Signature match from {src_address} to {dst_address}: {signature_match}")
+
+if _name_ == "_main_":
+    # Replace 'eth0' with your actual network interface name
+    interface = 'eth0'
+    try:
+        sniff_packets(interface)
+    except OSError as e:
+        print(f"Error: {e}. Make sure to run the program with sufficient privileges (sudo or administrator).")
